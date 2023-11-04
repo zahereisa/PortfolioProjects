@@ -1,0 +1,44 @@
+K means Clustering CMS
+Zaher Eisa
+2023-08-14
+###running regression on total claims, drug cost impact on total payments##
+setwd(“C:/Users/Owner/Documents/R_analysis”) trend_prscrbr<-
+read.csv(“C:/Users/Owner/Documents/R_analysis/prscrbr_drugtrend.csv”) trend_analysis<-
+read.csv(“C:/Users/Owner/Documents/R_analysis/trend_analysis_wbrand_gnrc.csv”) trend_toppaid1<-
+read.csv(“C:/Users/Owner/Documents/R_analysis/trend_toppaid.csv”) Tot_pclms<-
+read.csv(“C:/Users/Owner/Documents/R_analysis/Tot_pclms.csv”) model_trend<-lm(trend_toppaid
+
+Num_of_brnd_name_drugs) #output_file<-“regression_analysis_report.txt”
+
+summary(model_trend) options(scipen=9999) summary(trend_toppaid)
+if (sink.number()>0){ sink.close() } sink(output_file) x<-trend_toppaid
+Total_Payments
+
+plot (x,y, main = “Scatter Plot”, xlab=“Num of Brand Drugs Prescribed”, ylab= “Total Payments Received”,col
+=“blue”,pch=18) #adding regression line abline(model_trend,col=“red”,lwd=2) print(summary(model_trend))
+output_file<-“regression_analysis_report.txt” sink(output_file)
+cat(capture.output(print(summary(model))),file=output_file sink()
+#K Means Clustering# install.packages(“factoextra”) library(factoextra) install.packages(“factoextra”
+#Tot_pclms labels Tot_pclms.labels =Tot_pclms$Prscrbr_Last_Org_Name table(Tot_pclms.labels)
+Tot_pclmsdata<- Tot_pclms[1:2] #scale data Tot_pclms_scale <- scale(Tot_pclmsdata) #Distance Tot_pclmsdata<-
+dist(Tot_pclms_scale) #calculate how many clusters we need fviz_nbclust(Tot_pclms_scale, kmeans, method =
+“wss”) + labs (subtitle = “Elbow method”)
+#kmeans
+km.out <- kmeans(Tot_pclms_scale,centers=3,nstart=1000) print(km.out) km.cluster <- km.out
+
+Prscrbr_Type, 1:dim(Tot_pclms)[1],sep=“_“)
+fviz_cluster(list(data=Tot_pclms_scale,cluster=km.cluster)) ######Checking Tolerance Variance Inflation Factors
+before regression analysis#### library(car) library(dplyr) model<-lm(Tot_pclms
+Tot_Clms+Tot_pclms$Prscrbr_Type,data=Tot_pclms) vif_values<-car::vif(model) tolerance_values<-1/vif_values
+```
+TotalP ayments + trendtoppaid
+
+Numo
+f b
+rndn amed
+
+rugsy < −trendtoppaid
+
+clusterrownames(Totpclmss cale) < −paste(Totpclms
+
+TotalP ayments Totpclms
