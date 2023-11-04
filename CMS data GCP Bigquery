@@ -1,0 +1,195 @@
+Programmer: Zaher Eisa
+Purpose: To explore Open Payments CMS data (Looking at prescribing trends)
+Date: June 2023
+--We join the three datasets: General, Research and Ownership by common columns
+YEAR 2018 datasets
+select distinct *
+from `open-payments-yr18-21.GNRL18.GNRL18` a
+left join `open-payments-yr18-21.4YRPayments.RSRCH18` b
+on
+a.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=b.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name
+and a.Record_ID=b.Record_ID
+full join `open-payments-yr18-21.4YRPayments.OWNR18` c
+on
+b.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=c.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name
+and b.Record_ID=c.Record_ID
+--Checking newly created dataset visually.
+select
+Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name, sum(Total_Amount_of_Payment_US
+Dollars), Nature_of_Payment_or_Transfer_of_Value
+from `open-payments-yr18-21.4YRPayments.PGRM18`
+group by Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name,
+Nature_of_Payment_or_Transfer_of_Value
+
+--Joining Program year 2019 datasets: General, Research, Ownership
+Select distinct *
+from `open-payments-yr18-21.GNRL19.GNRL19` a
+left join `open-payments-yr18-21.4YRPayments.RSRCH19` b
+on
+a.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=b.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name
+and a.Record_ID=b.Record_ID
+full join `open-payments-yr18-21.4YRPayments.OWNR19` c
+on
+b.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=c.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name
+and b.Record_ID=c.Record_ID
+--YEAR 2020
+select distinct *
+from `open-payments-yr18-21.GNRL20.GNRL20` a
+left join `open-payments-yr18-21.4YRPayments.RSRCH20`b
+on
+a.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=b.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name and
+a.Record_ID=b.Record_ID
+full join `open-payments-yr18-21.4YRPayments.OWNR20g` c
+on
+b.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=c.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name and b.Record_ID=c.Record_ID
+
+--YEAR 2021
+select distinct *
+from `open-payments-yr18-21.GNRL21.GNRLYR21` a
+left join `open-payments-yr18-21.4YRPayments.RSRCH21` b
+on
+a.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=b.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name and
+a.Covered_Recipient_Profile_ID=b.Covered_Recipient_Profile_ID
+full join `open-payments-yr18-21.4YRPayments.OWNR21` c
+on
+b.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=c.Applicable_Manufacturer_or_A
+pplicable_GPO_Making_Payment_Name and
+b.Record_ID=c.Record_ID
+
+--We append all 4 program years for futher analysis
+CREATE TABLE Combined as
+SELECT *
+from "open-payments-yr18-21.4YRPayments.PGRM18"
+UNION ALL
+SELECT *
+FROM * open-payments-yr18-21.4YRPayments PGRM19
+UNION ALL
+SELECT *
+FROM open-payments-yr18-21.4YRPayments PGRM20
+UNION ALL
+SELECT *
+FROM open-payments-yr18-21.4YRPayments RSRCH21;
+
+Select Nature_of_Payment_or_Transfer_of_Value, sum(Total_Amount_of_Payment_USDollars), count
+(Covered_Recipient_Type) as Numer_of_Physicians
+from combinedpgrm.prgrms.PGRM18a
+where Covered_Recipient_Type in ('Covered Recipient Physician')
+group by Nature_of_Payment_or_Transfer_of_Value
+select distinct
+Nature_of_Payment_or_Transfer_of_Value,sum(Total_Amount_of_Payment_USDollars),count
+(Covered_Recipient_Type)
+from `combinedpgrm.prgrms.PGRM18a`
+where Covered_Recipient_Type like '%Physician%'
+group by Nature_of_Payment_or_Transfer_of_Value, Covered_Recipient_Type
+/**Extracting total payments for covered recipient type for each program year*/
+Select
+Covered_Recipient_Type,
+Program_Year,
+sum(CASE WHEN payment_type = 'General Payments' THEN Total_Amount_of_Payment_USDollars ELSE
+0 END) as General,
+sum(CASE WHEN payment_type = 'Research Payments' THEN Total_Amount_of_Payment_USDollars ELSE
+0 END) as Research
+FROM (
+select
+
+'General Payments' as payment_type,
+Covered_Recipient_Type,Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.GNRL18.GNRL18`
+where Covered_Recipient_Type like '%Physician%' or Covered_Recipient_Type like
+'%Teaching%'
+
+UNION ALL
+SELECT
+'Research Payments' as payment_type,
+Covered_Recipient_Type,Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.4YRPayments.RSRCH18`
+where Covered_Recipient_Type like '%Physician%' or Covered_Recipient_Type like
+'%Teaching%'
+UNION ALL
+SELECT
+'General Payments' as payment_date,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.GNRL19.GNRL19`
+where Covered_Recipient_Type like '%Physician%' or Covered_Recipient_Type like '%Teaching%'
+UNION ALL
+SELECT
+'Research Payments' as payment_type,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.4YRPayments.RSRCH19`
+where Covered_Recipient_Type like '%Physician%' or Covered_Recipient_Type like
+'%Teaching%'
+UNION ALL
+SELECT
+'General Payments' as payment_date,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.GNRL20.GNRL20`
+where Covered_Recipient_Type like '%Physician%' or Covered_Recipient_Type like
+'%Teaching%'
+UNION ALL
+SELECT
+
+'Research Payments' as payment_type,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.4YRPayments.RSRCH20`
+where Covered_Recipient_Type like '%Physician%' or Covered_Recipient_Type like
+'%Teaching%'
+UNION ALL
+SELECT
+'General Payments' as payment_date,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.GNRL21.GNRL21`
+where Covered_Recipient_Type in ('Covered Recipient Physician') or Covered_Recipient_Type
+in ('Covered Recipient Teaching Hospital')
+UNION ALL
+SELECT
+'Research Payments' as payment_type,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.4YRPayments.RSRCH21`
+where Covered_Recipient_Type in ('Covered Recipient Physician') or Covered_Recipient_Type
+in ('Covered Recipient Teaching Hospital')
+UNION ALL
+select
+'General Payments' as payment_date,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+from `open-payments-yr18-21.4YRPayments.GNRL22`
+where Covered_Recipient_Type in ('Covered Recipient Physician') or Covered_Recipient_Type
+in ('Covered Recipient Teaching Hospital')
+UNION ALL
+select
+'Research Payments' as payment_date,
+Covered_Recipient_Type,
+Total_Amount_of_Payment_USDollars,
+Program_Year
+FROM `open-payments-yr18-21.4YRPayments.RSRCH22`
+where Covered_Recipient_Type in ('Covered Recipient Physician') or Covered_Recipient_Type
+in ('Covered Recipient Teaching Hospital')
+) as gnrl_rsrch18
+
+group by
+Covered_Recipient_Type, Program_Year
+order by Program_Year;
+/*Extracting number of Reporting Entities GPO, Teaching Hospitals, Physicians for program
+years 2018 through 2022*/
